@@ -13,7 +13,7 @@
 				console.log(`My health:${this.health}`);
 			}
 			hit(enemy, point) {
-				let damage = point * this.power;
+				let damage = point > 0 ? point * this.power : this.power;
 				enemy.setDamage(damage);
 			}
 		}
@@ -34,7 +34,7 @@
 			}
 
 			setDamage(damage) {
-				super.setDamage(() => damage / 2);
+				super.setDamage(damage / 2);
 			}
 		}
 
@@ -43,10 +43,28 @@
 				fetch("http://jsonplaceholder.typicode.com/users")
 					.then(response => response.json())
 					.then(users => {
-						let fighter = new Fighter(users[0].name, 10, 100)
-						let improvedFighter = new ImprovedFighter(users[1].name, 5, 100);
+						let fighter = new Fighter(users[0].name, 5, 100)
+						let improvedFighter = new ImprovedFighter(users[1].name, 3, 100);
+						let weakFighter = new WeakFighter(users[2].name, 4, 100);
+						let fighters = [fighter, improvedFighter, weakFighter];
 
-						this.fight(fighter, improvedFighter, ...this.getPoint()); // only for showing spread/rest operators
+						while(fighters.length !== 1) {
+							let firstFighterId = this.getRandom(fighters.length);
+							let secondFighterId;
+
+							while((secondFighterId = this.getRandom(fighters.length)) === firstFighterId);
+
+							let firstFighter = fighters[firstFighterId];
+							let secondFighter = fighters[secondFighterId];
+
+							this.fight(firstFighter, secondFighter, ...this.getPoint()); // only for showing spread/rest operators
+							if (secondFighter.health <= 0) {
+								console.log(`${secondFighter.name} dead`);
+								fighters = this.remove(fighters, secondFighter);
+							}
+						}
+
+						console.log(`${fighters[0].name} wins`);
 					});
 			}
 
@@ -55,9 +73,17 @@
 			}
 
 			static getPoint() {
-				let pointCount = Math.random() * 5;
+				let pointCount = this.getRandom(5);
 
-				return Array.from({length: pointCount}, () => Math.floor(Math.random() * 9));;
+				return Array.from({length: pointCount}, () => this.getRandom(9));;
+			}
+
+			static getRandom(limit) {
+				return Math.floor(Math.random() * limit);
+			}
+
+			static remove(array, element) {
+			    return array.filter(e => e !== element);
 			}
 		}
 	</script>
