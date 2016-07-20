@@ -1,0 +1,65 @@
+<htmL>
+<head>
+	<script type="text/javascript">
+		class Fighter {
+			constructor(name, power, health) {
+				this.health = health;
+				this.name = name;
+				this.power = power;
+			}
+
+			setDamage(damage) {
+				this.health = this.health - damage;
+				console.log(`My health:${this.health}`);
+			}
+			hit(enemy, point) {
+				let damage = point * this.power;
+				enemy.setDamage(damage);
+			}
+		}
+
+		class ImprovedFighter extends Fighter {
+			constructor(name, power, health) {
+				super(name, power, health);
+			}
+
+			doubleHit(point) {
+				super.hit(point * 2);
+			}
+		}
+
+		class WeakFighter extends ImprovedFighter {
+			constructor(name, power, health) {
+				super(name, power, health);
+			}
+
+			setDamage(damage) {
+				super.setDamage(() => damage / 2);
+			}
+		}
+
+		class Game {
+			static run() {
+				fetch("http://jsonplaceholder.typicode.com/users")
+					.then(response => response.json())
+					.then(users => {
+						let fighter = new Fighter(users[0].name, 10, 100)
+						let improvedFighter = new ImprovedFighter(users[1].name, 5, 100);
+
+						this.fight(fighter, improvedFighter, ...this.getPoint()); // only for showing spread/rest operators
+					});
+			}
+
+			static fight(fighter, otherFighter, ...points) {
+				points.forEach(point => fighter.hit(otherFighter, point));
+			}
+
+			static getPoint() {
+				let pointCount = Math.random() * 5;
+
+				return Array.from({length: pointCount}, () => Math.floor(Math.random() * 9));;
+			}
+		}
+	</script>
+</head>
+</htmL>
